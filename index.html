@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Promille Tracker Pro</title>
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Promille Pro">
+  <meta name="theme-color" content="#090d16">
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg: #090d16;
+      --card-bg: #121826;
+      --card-sub: #192235;
+      --border: #232f48;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #10b981;
+      --primary-dark: #065f46;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --blue: #38bdf8;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.4;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 50px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 540px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0 2px;
+    }
+
+    .logo-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 20px;
+      color: #022c22;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+    }
+
+    .logo-text h1 {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+
+    .logo-text span {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .btn-header {
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    }
+
+    /* Magenfüllung / Mahlzeit */
+    .meal-card {
+      background: linear-gradient(180deg, #182236, var(--card-bg));
+      border: 1px solid var(--border);
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .card-title-sm {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .meal-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .btn-meal {
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .btn-meal.active {
+      background: rgba(16, 185, 129, 0.18);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .btn-meal .meal-icon {
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .btn-meal .meal-sub {
+      font-size: 9px;
+      color: var(--text-muted);
+      font-weight: normal;
+    }
+
+    /* Hero Status */
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(160deg, #142036, #0e1626);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .promille-wrap {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin: 10px 0 2px;
+    }
+
+    .promille-val {
+      font-size: 58px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      color: #fff;
+    }
+
+    .promille-unit {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .sub-stats {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    /* Prognose-Box */
+    .forecast-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .forecast-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .forecast-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      padding: 4px 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+    }
+
+    .forecast-item:last-child {
+      border-bottom: none;
+    }
+
+    .forecast-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+    }
+
+    .forecast-val {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tag-legal {
+      font-size: 9px;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    /* 2-Schritt Auswahl */
+    .section-title-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-circle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #042f2e;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .section-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .grid-beverages {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .btn-bev {
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 10px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+      touch-action: manipulation;
+    }
+
+    .btn-bev:active {
+      transform: scale(0.97);
+      background: #232e44;
+      border-color: var(--primary);
+    }
+
+    .bev-emoji {
+      font-size: 24px;
+      line-height: 1;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .bev-name {
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bev-vol {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Schritt 2 View */
+    .step2-wrap {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .selected-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 14px;
+    }
+
+    .selected-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-back {
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    /* Zeitauswahl & Tag */
+    .drink-timing-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .timing-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .timing-row label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .time-input {
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 8px;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .night-toggle {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-tag {
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-tag.active {
+      background: var(--primary-dark);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .grid-portions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .btn-portion {
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 10px;
+      text-align: left;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 60px;
+      transition: all 0.15s ease;
+      touch-action: manipulation;
+    }
+
+    .btn-portion.selected {
+      background: #064e3b;
+      border-color: var(--primary);
+    }
+
+    .btn-portion .p-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .btn-portion .p-sub {
+      font-size: 11px;
+      color: var(--primary);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    /* Manuelle Eingabe */
+    .manual-volume-box {
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .manual-volume-box label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .manual-input-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .manual-input-row input {
+      flex: 1;
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      color: #fff;
+      font-size: 13px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .manual-input-row select {
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      color: #fff;
+      font-size: 12px;
+      padding: 8px 6px;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .btn-submit-drink {
+      background: var(--primary);
+      color: #042f2e;
+      border: none;
+      font-size: 14px;
+      font-weight: 800;
+      padding: 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: center;
+      width: 100%;
+      margin-top: 4px;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+      touch-action: manipulation;
+    }
+
+    .btn-submit-drink:active {
+      transform: scale(0.98);
+    }
+
+    /* Graph Canvas */
+    .chart-container {
+      position: relative;
+      margin-top: 6px;
+    }
+
+    .scrubber-info {
+      min-height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 10px;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    .scrubber-val {
+      font-weight: 800;
+      color: var(--primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .chart-wrap {
+      width: 100%;
+      height: 220px;
+      position: relative;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 12px;
+      background: #0a0e17;
+      touch-action: none;
+    }
+
+    /* Stundentabelle */
+    .milestones-box {
+      margin-top: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .milestone-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    .milestone-table th {
+      text-align: left;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .milestone-table td {
+      padding: 6px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .milestone-table tr.peak-row {
+      background: rgba(245, 158, 11, 0.1);
+      font-weight: 700;
+    }
+
+    .milestone-scroll {
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    /* Liste */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 260px;
+      overflow-y: auto;
+      margin-top: 6px;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 12px;
+      transition: background 0.2s ease;
+    }
+
+    .history-item.just-added {
+      border-color: var(--primary);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .hist-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hist-title {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .hist-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .hist-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hist-time {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--blue);
+      text-align: right;
+    }
+
+    .btn-del {
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 6px;
+    }
+
+    .btn-del:active {
+      background: rgba(239, 68, 68, 0.2);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 24px 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+    }
+
+    /* Actions */
+    .actions-bar {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-action {
+      flex: 1;
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-action.reset {
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .legal-notice {
+      font-size: 10px;
+      color: #64748b;
+      line-height: 1.35;
+      text-align: center;
+      padding: 0 8px;
+    }
+
+    /* Modals */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 440px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .input-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .btn-submit {
+      background: var(--primary);
+      color: #042f2e;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1e293b;
+      color: #fff;
+      border: 1px solid var(--border);
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
+      pointer-events: none;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+      opacity: 0;
+      z-index: 1000;
+      white-space: nowrap;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+    }
+
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="logo-box">
+        <div class="badge-icon">‰</div>
+        <div class="logo-text">
+          <h1>Promille Tracker Pro</h1>
+          <span id="currentTimeLabel">Live-Uhr: --:--</span>
+        </div>
+      </div>
+      <button class="btn-header" onclick="openProfileModal()" id="btnProfileLabel">80 kg · ♂</button>
+    </header>
+
+    <!-- Magenzustand / Mahlzeiten-Leiste -->
+    <div class="card meal-card">
+      <div class="card-head" style="margin-bottom:2px;">
+        <span class="card-title-sm" style="color:var(--amber);">🍽️ Magenfüllung & Resorption</span>
+        <span style="font-size:10px; color:var(--text-muted);" id="mealDetailDesc">10m Lag · 30m Peak</span>
+      </div>
+      <div class="meal-options">
+        <button class="btn-meal" id="mealBtnEmpty" onclick="setMealState('empty')">
+          <span class="meal-icon">⚡</span>
+          <span>Nüchtern</span>
+          <span class="meal-sub">Schnell (10m Lag)</span>
+        </button>
+        <button class="btn-meal active" id="mealBtnNormal" onclick="setMealState('normal')">
+          <span class="meal-icon">🥪</span>
+          <span>Normal</span>
+          <span class="meal-sub">Standard (20m Lag)</span>
+        </button>
+        <button class="btn-meal" id="mealBtnFull" onclick="setMealState('heavy')">
+          <span class="meal-icon">🍖</span>
+          <span>Fettig / Viel</span>
+          <span class="meal-sub">Flach (35m Lag)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Status / Hero -->
+    <div class="card hero-card">
+      <div id="statusBadge" class="status-badge">
+        <span class="dot"></span>
+        <span id="statusText">Nüchtern (0,00 ‰)</span>
+      </div>
+
+      <div class="promille-wrap">
+        <span class="promille-val" id="promilleVal">0,00</span>
+        <span class="promille-unit">‰</span>
+      </div>
+
+      <div class="sub-stats" id="subStatsText">0 g reiner Alkohol getrunken</div>
+
+      <!-- Fahrfähigkeits-Prognose -->
+      <div class="forecast-box">
+        <div class="forecast-title">
+          <span>🚗 Fahrtauglichkeit-Prognose</span>
+          <span id="forecastContext">Live-Berechnung</span>
+        </div>
+
+        <div class="forecast-item">
+          <div class="forecast-label">
+            <span class="tag-legal" style="background:rgba(244,63,94,0.2); color:var(--rose);">0,5 ‰</span>
+            <span>Unter 0,5 ‰ (StVO-Grenze):</span>
+          </div>
+          <div class="forecast-val" id="forecast05">Sofort</div>
+        </div>
+
+        <div class="forecast-item">
+          <div class="forecast-label">
+            <span class="tag-legal" style="background:rgba(245,158,11,0.2); color:var(--amber);">0,3 ‰</span>
+            <span>Unter 0,3 ‰ (StGB Ausfallgefahr):</span>
+          </div>
+          <div class="forecast-val" id="forecast03">Sofort</div>
+        </div>
+
+        <div class="forecast-item">
+          <div class="forecast-label">
+            <span class="tag-legal" style="background:rgba(16,185,129,0.2); color:var(--primary);">0,0 ‰</span>
+            <span>Vollständig nüchtern (0,00 ‰):</span>
+          </div>
+          <div class="forecast-val" id="forecast00">Sofort</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2-Schritt Schnellauswahl -->
+    <div class="card" id="selectionCard">
+      <!-- Schritt 1: Getränk -->
+      <div id="step1Wrap">
+        <div class="section-title-bar">
+          <div>
+            <div class="section-title"><span class="step-circle">1</span> Getränk wählen</div>
+            <div class="section-desc">Tippe auf dein Getränk</div>
+          </div>
+        </div>
+        <div class="grid-beverages" id="beverageGrid">
+          <!-- Dynamisch -->
+        </div>
+      </div>
+
+      <!-- Schritt 2: Menge & Details -->
+      <div id="step2Wrap" class="step2-wrap">
+        <div class="section-title-bar">
+          <div>
+            <div class="section-title"><span class="step-circle">2</span> Menge & Uhrzeit</div>
+            <div class="section-desc">Portion wählen oder manuell eingeben</div>
+          </div>
+          <button class="btn-back" onclick="resetToStep1()">← Zurück</button>
+        </div>
+
+        <div class="selected-banner">
+          <div class="selected-left">
+            <span class="bev-emoji" id="selBevEmoji">🍺</span>
+            <div>
+              <div style="font-size:14px; font-weight:700;" id="selBevName">Pils</div>
+              <div style="font-size:11px; color:var(--text-muted);" id="selBevAbv">4.9 Vol.-%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zeitsteuerung -->
+        <div class="drink-timing-box">
+          <div class="timing-row">
+            <label>Wann getrunken?</label>
+            <div class="night-toggle">
+              <button class="btn-tag active" id="btnDaySame" onclick="setPortionDayOffset(0)">Heute / Vor Mitternacht</button>
+              <button class="btn-tag" id="btnDayNext" onclick="setPortionDayOffset(1)">Nach Mitternacht (+1 Tag)</button>
+            </div>
+          </div>
+          <div class="timing-row">
+            <input type="time" id="portionTime" class="time-input">
+            <button class="btn-tag" onclick="setPortionTimeToNow()">Jetzt</button>
+          </div>
+        </div>
+
+        <!-- Standard-Portionen -->
+        <div>
+          <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px; font-weight:600;">PORTION WÄHLEN:</div>
+          <div class="grid-portions" id="portionsGrid">
+            <!-- Dynamisch -->
+          </div>
+        </div>
+
+        <!-- Manuelle Eingabe -->
+        <div class="manual-volume-box">
+          <label for="manualVolumeInput">ODER MANUELLE MENGE:</label>
+          <div class="manual-input-row">
+            <input type="number" id="manualVolumeInput" placeholder="z. B. 250" step="any" min="1" oninput="onManualInputChanged()">
+            <select id="manualVolumeUnit" onchange="onManualInputChanged()">
+              <option value="ml" selected>ml</option>
+              <option value="l">Liter</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Großer Buchen-Button -->
+        <button class="btn-submit-drink" id="btnConfirmDrink" onclick="commitSelectedDrink()">
+          + Getränk hinzufügen
+        </button>
+      </div>
+    </div>
+
+    <!-- Interaktiver Verlaufsgraph -->
+    <div class="card">
+      <div class="section-title-bar">
+        <div>
+          <div class="section-title">Promille-Verlauf</div>
+          <div class="section-desc">Berühre/fahre über den Graph für exakte Werte</div>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <div class="scrubber-info" id="scrubberInfo">
+          <span id="scrubTime">Tippe auf den Graphen</span>
+          <span class="scrubber-val" id="scrubVal">-- ‰</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="bacCanvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Meilenstein-Tabelle -->
+      <div class="milestones-box">
+        <div class="milestone-scroll">
+          <table class="milestone-table">
+            <thead>
+              <tr>
+                <th>Uhrzeit</th>
+                <th>Promille</th>
+                <th>Status / Phase</th>
+              </tr>
+            </thead>
+            <tbody id="milestonesBody">
+              <!-- Dynamisch -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Getränke-Übersicht (IMMER sichtbar) -->
+    <div class="card">
+      <div class="section-title-bar">
+        <div>
+          <div class="section-title">Erfasste Getränke</div>
+          <div class="section-desc" id="drinkCountDesc">0 Getränke erfasst</div>
+        </div>
+        <button class="btn-back" onclick="loadUserScenario()">Beispiel laden</button>
+      </div>
+
+      <div class="history-list" id="historyList">
+        <div class="empty-state">Noch keine Getränke erfasst. Wähle oben ein Getränk aus.</div>
+      </div>
+    </div>
+
+    <!-- Aktionen -->
+    <div class="actions-bar">
+      <button class="btn-action reset" onclick="clearAllDrinks()">Alle Getränke löschen</button>
+      <button class="btn-action" onclick="openProfileModal()">Profil / Abbau</button>
+    </div>
+
+    <p class="legal-notice">
+      Hinweis: Berechnung nach Widmark (inkl. Resorptions-Lag & kontinuierlichem Abbau) dient der theoretischen Orientierung. Fahrtüchtigkeit setzt 0,0 ‰ voraus. Rechtlich drohen ab 0,3 ‰ bei Ausfallerscheinungen strafrechtliche Konsequenzen, ab 0,5 ‰ Bußgelder und Fahrverbote.
+    </p>
+  </div>
+
+  <!-- Profil Modal -->
+  <div class="modal-backdrop" id="profileModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>Profil & Abbaurate</span>
+        <button onclick="closeProfileModal()" style="background:none; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+      </div>
+
+      <div class="input-group">
+        <label>Körpergewicht (kg)</label>
+        <input type="number" id="inputWeight" class="form-input" min="40" max="180" value="80">
+      </div>
+
+      <div class="input-group">
+        <label>Biologisches Geschlecht</label>
+        <select id="inputGender" class="form-input">
+          <option value="male">Männlich (Verteilungsfaktor r = 0,70)</option>
+          <option value="female">Weiblich (Verteilungsfaktor r = 0,60)</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>Abbaurate der Leber pro Stunde</label>
+        <select id="inputRate" class="form-input">
+          <option value="0.15">0,15 ‰ / Stunde (Standard-Durchschnitt)</option>
+          <option value="0.10">0,10 ‰ / Stunde (Defensiv / Vorsichtig)</option>
+        </select>
+      </div>
+
+      <button class="btn-submit" onclick="saveProfileFromModal()">Speichern</button>
+    </div>
+  </div>
+
+  <!-- Custom Drink Modal -->
+  <div class="modal-backdrop" id="customModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>Eigenes Getränk anlegen</span>
+        <button onclick="closeCustomModal()" style="background:none; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+      </div>
+
+      <div class="input-group">
+        <label>Name des Getränks</label>
+        <input type="text" id="custName" class="form-input" placeholder="z. B. Gin Tonic">
+      </div>
+
+      <div class="input-group">
+        <label>Typische Menge in Liter (z. B. 0.30)</label>
+        <input type="number" id="custVolume" step="0.01" class="form-input" placeholder="0.30">
+      </div>
+
+      <div class="input-group">
+        <label>Alkoholgehalt in Vol.-% (z. B. 10.5)</label>
+        <input type="number" id="custAbv" step="0.1" class="form-input" placeholder="10.5">
+      </div>
+
+      <button class="btn-submit" onclick="addCustomDrink()">Übernehmen & Auswählen</button>
+    </div>
+  </div>
+
+  <div id="toast">Meldung</div>
+
+  <script>
+    /* -------------------------------------------------------------
+       Sicherer Speicher mit Fallback
+       ------------------------------------------------------------- */
+    const memoryStore = {};
+
+    function safeGet(key, fallback) {
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          const item = window.localStorage.getItem(key);
+          if (item !== null && item !== undefined) {
+            return JSON.parse(item);
+          }
+        }
+      } catch (e) {
+        console.warn('localStorage read error, using fallback', e);
+      }
+      return memoryStore[key] !== undefined ? memoryStore[key] : fallback;
+    }
+
+    function safeSet(key, value) {
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem(key, JSON.stringify(value));
+        }
+      } catch (e) {
+        console.warn('localStorage write error', e);
+      }
+      memoryStore[key] = value;
+    }
+
+    /* -------------------------------------------------------------
+       App State
+       ------------------------------------------------------------- */
+    let profile = safeGet('pt_profile', { weight: 80, gender: 'male', rate: 0.15 });
+    let drinks = safeGet('pt_drinks', []);
+    
+    // Physiologisches Resorptionsmodell
+    const MEAL_CONFIGS = {
+      empty: {
+        label: 'Nüchtern',
+        lagMinutes: 10,
+        resorptionMinutes: 30,
+        lossDeficit: 0.90, // 10% Verlust
+        desc: '10m Lag · 30m bis Peak · 10% Verlust'
+      },
+      normal: {
+        label: 'Normal',
+        lagMinutes: 20,
+        resorptionMinutes: 50,
+        lossDeficit: 0.85, // 15% Verlust
+        desc: '20m Lag · 50m bis Peak · 15% Verlust'
+      },
+      heavy: {
+        label: 'Fettig / Üppig',
+        lagMinutes: 35,
+        resorptionMinutes: 75,
+        lossDeficit: 0.78, // 22% Verlust
+        desc: '35m Lag · 75m bis Peak · 22% Verlust'
+      }
+    };
+    let currentMealState = safeGet('pt_meal_state', 'normal');
+
+    const BEVERAGE_CATALOG = [
+      {
+        id: 'pils',
+        name: 'Pils / Helles',
+        abv: 4.9,
+        emoji: '🍺',
+        portions: [
+          { label: '0,33 l', volume: 0.33, name: 'Pils (0,33 l)' },
+          { label: '0,4 l', volume: 0.40, name: 'Pils (0,4 l)' },
+          { label: '0,5 l', volume: 0.50, name: 'Pils (0,5 l / Halbe)' }
+        ]
+      },
+      {
+        id: 'weizen',
+        name: 'Weizenbier',
+        abv: 5.2,
+        emoji: '🌾',
+        portions: [
+          { label: '0,5 l', volume: 0.50, name: 'Weizen (0,5 l)' },
+          { label: '0,33 l', volume: 0.33, name: 'Weizen (0,33 l)' }
+        ]
+      },
+      {
+        id: 'wein',
+        name: 'Wein',
+        abv: 12.0,
+        emoji: '🍷',
+        portions: [
+          { label: '0,1 l', volume: 0.10, name: 'Wein (0,1 l)' },
+          { label: '0,2 l', volume: 0.20, name: 'Wein (0,2 l)' },
+          { label: '0,25 l', volume: 0.25, name: 'Wein (0,25 l)' }
+        ]
+      },
+      {
+        id: 'weinschorle',
+        name: 'Weinschorle',
+        abv: 6.0,
+        emoji: '🥂',
+        portions: [
+          { label: '0,25 l', volume: 0.25, name: 'Weinschorle (0,25 l)' },
+          { label: '0,5 l', volume: 0.50, name: 'Weinschorle (0,5 l)' }
+        ]
+      },
+      {
+        id: 'sekt',
+        name: 'Sekt / Prosecco',
+        abv: 11.5,
+        emoji: '🍾',
+        portions: [
+          { label: '0,1 l', volume: 0.10, name: 'Sekt (0,1 l)' },
+          { label: '0,2 l', volume: 0.20, name: 'Sekt (0,2 l)' }
+        ]
+      },
+      {
+        id: 'aperol',
+        name: 'Aperol Spritz',
+        abv: 10.5,
+        emoji: '🍹',
+        portions: [
+          { label: '0,2 l', volume: 0.20, name: 'Aperol Spritz (0,2 l)' },
+          { label: '0,3 l', volume: 0.30, name: 'Aperol Spritz (0,3 l)' }
+        ]
+      },
+      {
+        id: 'sarti',
+        name: 'Sarti Rosa / Spritz',
+        abv: 14.0,
+        emoji: '🍸',
+        portions: [
+          { label: '0,1 l (pur)', volume: 0.10, abv: 14.0, name: 'Sarti Rosa pur (0,1 l)' },
+          { label: '0,2 l (Spritz)', volume: 0.20, abv: 8.0, name: 'Sarti Spritz (0,2 l)' },
+          { label: '0,25 l (Spritz)', volume: 0.25, abv: 8.0, name: 'Sarti Spritz (0,25 l)' }
+        ]
+      },
+      {
+        id: 'shot',
+        name: 'Schnaps / Shot',
+        abv: 40.0,
+        emoji: '🥃',
+        portions: [
+          { label: '2 cl (0,02 l)', volume: 0.02, name: 'Shot (2 cl)' },
+          { label: '4 cl (0,04 l)', volume: 0.04, name: 'Doppelter Shot (4 cl)' }
+        ]
+      }
+    ];
+
+    // Aktuell aktiver Zustand in Schritt 2
+    let currentSelectedBeverage = null;
+    let selectedPortion = null;
+    let portionDayOffset = 0; // 0 = heute, 1 = nach Mitternacht
+
+    /* -------------------------------------------------------------
+       Init
+       ------------------------------------------------------------- */
+    window.addEventListener('DOMContentLoaded', () => {
+      // Validiere gespeicherte Drinks
+      if (!Array.isArray(drinks)) drinks = [];
+
+      syncMealButtons();
+      renderBeverages();
+      updateProfileLabel();
+      setPortionTimeToNow();
+      setupCanvasInteractions();
+      recalcAndRender();
+
+      setInterval(() => {
+        updateClockDisplay();
+        recalcAndRender();
+      }, 30000);
+
+      window.addEventListener('resize', drawCanvasChart);
+    });
+
+    function setMealState(stateKey) {
+      if (!MEAL_CONFIGS[stateKey]) return;
+      currentMealState = stateKey;
+      safeSet('pt_meal_state', currentMealState);
+      syncMealButtons();
+      recalcAndRender();
+      showToast(`Magenfüllung: ${MEAL_CONFIGS[stateKey].label}`);
+    }
+
+    function syncMealButtons() {
+      document.getElementById('mealBtnEmpty').classList.toggle('active', currentMealState === 'empty');
+      document.getElementById('mealBtnNormal').classList.toggle('active', currentMealState === 'normal');
+      document.getElementById('mealBtnFull').classList.toggle('active', currentMealState === 'heavy');
+      const cfg = MEAL_CONFIGS[currentMealState] || MEAL_CONFIGS.normal;
+      const descEl = document.getElementById('mealDetailDesc');
+      if (descEl) descEl.textContent = cfg.desc;
+    }
+
+    function updateClockDisplay() {
+      const now = new Date();
+      document.getElementById('currentTimeLabel').textContent = `Live-Uhr: ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    }
+
+    /* -------------------------------------------------------------
+       Schritt 1: Getränke-Auswahl
+       ------------------------------------------------------------- */
+    function renderBeverages() {
+      const grid = document.getElementById('beverageGrid');
+      grid.innerHTML = '';
+
+      BEVERAGE_CATALOG.forEach(bev => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn-bev';
+        btn.onclick = () => selectBeverage(bev);
+        btn.innerHTML = `
+          <span class="bev-emoji">${bev.emoji}</span>
+          <div style="min-width:0;">
+            <div class="bev-name">${bev.name}</div>
+            <div class="bev-vol">${bev.abv} Vol.-%</div>
+          </div>
+        `;
+        grid.appendChild(btn);
+      });
+
+      const customBtn = document.createElement('button');
+      customBtn.type = 'button';
+      customBtn.className = 'btn-bev';
+      customBtn.onclick = openCustomModal;
+      customBtn.innerHTML = `
+        <span class="bev-emoji" style="background:#1e293b; color:#10b981;">+</span>
+        <div style="min-width:0;">
+          <div class="bev-name" style="color:#10b981;">Eigenes Getränk</div>
+          <div class="bev-vol">Individuell</div>
+        </div>
+      `;
+      grid.appendChild(customBtn);
+    }
+
+    function selectBeverage(bev) {
+      currentSelectedBeverage = bev;
+      document.getElementById('step1Wrap').style.display = 'none';
+      document.getElementById('step2Wrap').style.display = 'flex';
+
+      document.getElementById('selBevEmoji').textContent = bev.emoji;
+      document.getElementById('selBevName').textContent = bev.name;
+      document.getElementById('selBevAbv').textContent = `${bev.abv} Vol.-%`;
+
+      const manInput = document.getElementById('manualVolumeInput');
+      if (manInput) manInput.value = '';
+
+      setPortionTimeToNow();
+
+      // Standard-Portionen anzeigen & erste Portion als Standard vorwählen
+      const pGrid = document.getElementById('portionsGrid');
+      pGrid.innerHTML = '';
+
+      selectedPortion = null;
+
+      bev.portions.forEach((p, idx) => {
+        const pBtn = document.createElement('button');
+        pBtn.type = 'button';
+        pBtn.className = 'btn-portion' + (idx === 0 ? ' selected' : '');
+        const usedAbv = p.abv !== undefined ? p.abv : bev.abv;
+        const grams = calcAlcoholGrams(p.volume, usedAbv).toFixed(1);
+
+        pBtn.onclick = () => choosePortionPreset(p, usedAbv, pBtn);
+        pBtn.innerHTML = `
+          <div class="p-label">${p.label}</div>
+          <div class="p-sub">${grams} g Alkohol</div>
+        `;
+        pGrid.appendChild(pBtn);
+
+        if (idx === 0) {
+          selectedPortion = {
+            name: p.name,
+            volume: p.volume,
+            abv: usedAbv
+          };
+        }
+      });
+
+      updateConfirmButtonText();
+    }
+
+    function choosePortionPreset(portion, abv, clickedBtn) {
+      document.querySelectorAll('.btn-portion').forEach(b => b.classList.remove('selected'));
+      clickedBtn.classList.add('selected');
+
+      // Manuelle Eingabe leeren, falls eine Portion gewählt wird
+      const manInput = document.getElementById('manualVolumeInput');
+      if (manInput) manInput.value = '';
+
+      selectedPortion = {
+        name: portion.name,
+        volume: portion.volume,
+        abv: abv
+      };
+
+      updateConfirmButtonText();
+    }
+
+    function onManualInputChanged() {
+      const val = parseFloat(document.getElementById('manualVolumeInput').value);
+      if (!isNaN(val) && val > 0) {
+        document.querySelectorAll('.btn-portion').forEach(b => b.classList.remove('selected'));
+        const unit = document.getElementById('manualVolumeUnit').value;
+        const volumeL = unit === 'ml' ? val / 1000 : val;
+        selectedPortion = {
+          name: `${currentSelectedBeverage.name} (${val} ${unit})`,
+          volume: volumeL,
+          abv: currentSelectedBeverage.abv
+        };
+      }
+      updateConfirmButtonText();
+    }
+
+    function updateConfirmButtonText() {
+      const btn = document.getElementById('btnConfirmDrink');
+      if (!selectedPortion) {
+        btn.textContent = '+ Getränk hinzufügen';
+        return;
+      }
+      const g = calcAlcoholGrams(selectedPortion.volume, selectedPortion.abv).toFixed(1);
+      btn.textContent = `+ ${selectedPortion.name} hinzufügen (${g} g)`;
+    }
+
+    function setPortionDayOffset(offset) {
+      portionDayOffset = offset;
+      document.getElementById('btnDaySame').classList.toggle('active', offset === 0);
+      document.getElementById('btnDayNext').classList.toggle('active', offset === 1);
+    }
+
+    function setPortionTimeToNow() {
+      const now = new Date();
+      const h = now.getHours();
+      const m = now.getMinutes();
+      document.getElementById('portionTime').value = `${pad(h)}:${pad(m)}`;
+      setPortionDayOffset(0);
+      updateClockDisplay();
+    }
+
+    function resetToStep1() {
+      currentSelectedBeverage = null;
+      selectedPortion = null;
+      document.getElementById('step2Wrap').style.display = 'none';
+      document.getElementById('step1Wrap').style.display = 'block';
+    }
+
+    /* -------------------------------------------------------------
+       Getränk buchen & Speichern (Verlässlich ohne Filter-Verlust)
+       ------------------------------------------------------------- */
+    function commitSelectedDrink() {
+      if (!currentSelectedBeverage) return;
+
+      // Falls weder Preset noch Manuell gesetzt ist
+      if (!selectedPortion) {
+        onManualInputChanged();
+      }
+
+      if (!selectedPortion || !selectedPortion.volume || selectedPortion.volume <= 0) {
+        showToast('Bitte wähle eine Portionsgröße oder gib eine Menge ein.');
+        return;
+      }
+
+      const timeVal = document.getElementById('portionTime').value || '20:00';
+      const [h, m] = timeVal.split(':').map(Number);
+
+      const targetDate = new Date();
+      targetDate.setHours(h, m, 0, 0);
+
+      // Falls "Nach Mitternacht" gewählt ist und es vor Mitternacht getrunken wurde
+      if (portionDayOffset === 1) {
+        targetDate.setDate(targetDate.getDate() + 1);
+      }
+
+      const newDrink = {
+        id: 'd_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        name: selectedPortion.name,
+        volume: selectedPortion.volume,
+        abv: selectedPortion.abv,
+        timestamp: targetDate.getTime(),
+        emoji: currentSelectedBeverage.emoji || '🍷'
+      };
+
+      drinks.push(newDrink);
+      safeSet('pt_drinks', drinks);
+
+      // UI aktualisieren
+      showToast(`Hinzugefügt: ${newDrink.name}`);
+      resetToStep1();
+      recalcAndRender(newDrink.id);
+    }
+
+    /* -------------------------------------------------------------
+       Physiologische Berechnung (Widmark + Lag + Resorption)
+       ------------------------------------------------------------- */
+    function calcAlcoholGrams(volL, abv) {
+      return (volL * 1000) * (abv / 100) * 0.8;
+    }
+
+    function computeSimulation() {
+      if (!drinks || drinks.length === 0) {
+        return {
+          currentBac: 0,
+          peakBac: 0,
+          peakTime: null,
+          timeUnder05: null,
+          timeUnder03: null,
+          timeZero: null,
+          points: [],
+          totalGrams: 0,
+          milestones: []
+        };
+      }
+
+      const sorted = [...drinks].sort((a, b) => a.timestamp - b.timestamp);
+      const totalGrams = sorted.reduce((sum, d) => sum + calcAlcoholGrams(d.volume, d.abv), 0);
+
+      const r = profile.gender === 'female' ? 0.60 : 0.70;
+      const reducedWeight = profile.weight * r;
+
+      const mealCfg = MEAL_CONFIGS[currentMealState] || MEAL_CONFIGS.normal;
+      const lagMinutes = mealCfg.lagMinutes;
+      const resorptionMinutes = mealCfg.resorptionMinutes;
+      const resorptionDeficit = mealCfg.lossDeficit;
+      const ratePerMinute = profile.rate / 60;
+
+      const firstTime = sorted[0].timestamp;
+      const lastTime = sorted[sorted.length - 1].timestamp;
+      const now = Date.now();
+
+      // Start: 10 Min vor dem ersten Drink
+      const startTime = firstTime - (10 * 60 * 1000);
+      const maxEndTime = Math.max(now + (6 * 3600 * 1000), lastTime + (24 * 3600 * 1000));
+
+      const stepMs = 5 * 60 * 1000; // 5-Minuten Auflösung
+      let cur = startTime;
+      let curBac = 0;
+      let peakBac = 0;
+      let peakTime = null;
+      let timeUnder05 = null;
+      let timeUnder03 = null;
+      let timeZero = null;
+
+      const points = [];
+      let liveBac = 0;
+      let liveFound = false;
+
+      while (cur <= maxEndTime) {
+        let inflow = 0;
+        for (let d of sorted) {
+          if (cur >= d.timestamp) {
+            const minSince = (cur - d.timestamp) / 60000;
+            // Erst nach Latenzzeit beginnt Resorption in die Blutbahn
+            if (minSince >= lagMinutes && minSince <= (lagMinutes + resorptionMinutes)) {
+              const maxBacContribution = (calcAlcoholGrams(d.volume, d.abv) * resorptionDeficit) / reducedWeight;
+              inflow += (maxBacContribution / resorptionMinutes) * 5;
+            }
+          }
+        }
+
+        curBac += inflow;
+        if (curBac > 0) {
+          curBac = Math.max(0, curBac - (ratePerMinute * 5));
+        }
+
+        if (curBac > peakBac) {
+          peakBac = curBac;
+          peakTime = new Date(cur);
+        }
+
+        const pastLastDrink = cur > (lastTime + (lagMinutes + resorptionMinutes) * 60000);
+        if (pastLastDrink) {
+          if (curBac < 0.50 && !timeUnder05 && peakBac >= 0.50) timeUnder05 = new Date(cur);
+          if (curBac < 0.30 && !timeUnder03 && peakBac >= 0.30) timeUnder03 = new Date(cur);
+          if (curBac === 0 && !timeZero) timeZero = new Date(cur);
+        }
+
+        if (!liveFound && cur >= now) {
+          liveBac = curBac;
+          liveFound = true;
+        }
+
+        points.push({ time: new Date(cur), bac: curBac });
+
+        // Abbruch wenn nüchtern und nach jetzt
+        if (timeZero && cur > now && (cur - timeZero.getTime() > 2 * 3600 * 1000)) {
+          break;
+        }
+
+        cur += stepMs;
+      }
+
+      if (!liveFound && points.length > 0) {
+        liveBac = points[points.length - 1].bac;
+      }
+
+      // Meilenstein-Stundentabelle generieren
+      const milestones = [];
+      if (points.length > 0) {
+        const startHour = new Date(points[0].time);
+        startHour.setMinutes(0, 0, 0);
+        const endHour = new Date(points[points.length - 1].time);
+
+        let hCur = startHour.getTime();
+        while (hCur <= endHour.getTime()) {
+          const pt = findNearestPoint(points, hCur);
+          if (pt) {
+            milestones.push({
+              time: new Date(hCur),
+              bac: pt.bac,
+              isPeak: false,
+              note: getStatusNote(pt.bac)
+            });
+          }
+          hCur += 3600 * 1000;
+        }
+
+        if (peakTime && peakBac > 0.04) {
+          milestones.push({
+            time: peakTime,
+            bac: peakBac,
+            isPeak: true,
+            note: '⚡ Höchststand (Peak)'
+          });
+          milestones.sort((a, b) => a.time.getTime() - b.time.getTime());
+        }
+      }
+
+      return {
+        currentBac: liveBac,
+        peakBac,
+        peakTime,
+        timeUnder05,
+        timeUnder03,
+        timeZero,
+        points,
+        totalGrams,
+        milestones
+      };
+    }
+
+    function findNearestPoint(pts, targetMs) {
+      if (!pts || pts.length === 0) return null;
+      let closest = pts[0];
+      let minDiff = Math.abs(pts[0].time.getTime() - targetMs);
+      for (let p of pts) {
+        const diff = Math.abs(p.time.getTime() - targetMs);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closest = p;
+        }
+      }
+      return closest;
+    }
+
+    function getStatusNote(b) {
+      if (b >= 0.5) return 'Fahruntüchtig (≥ 0,5 ‰)';
+      if (b >= 0.3) return 'Gefahrenbereich (≥ 0,3 ‰)';
+      if (b > 0.02) return 'Abbauphase aktiv';
+      return 'Nüchtern';
+    }
+
+    /* -------------------------------------------------------------
+       UI Rendering
+       ------------------------------------------------------------- */
+    let lastSimResult = null;
+
+    function recalcAndRender(highlightId = null) {
+      const res = computeSimulation();
+      lastSimResult = res;
+
+      // 1. Promille-Wert Hero
+      document.getElementById('promilleVal').textContent = res.currentBac.toFixed(2).replace('.', ',');
+      document.getElementById('subStatsText').textContent = `${res.totalGrams.toFixed(1).replace('.', ',')} g reiner Alkohol getrunken`;
+
+      // 2. Status Badge
+      const badge = document.getElementById('statusBadge');
+      const text = document.getElementById('statusText');
+      if (res.currentBac >= 0.5) {
+        badge.style.background = 'rgba(244, 63, 94, 0.15)';
+        badge.style.color = 'var(--rose)';
+        badge.style.borderColor = 'rgba(244, 63, 94, 0.3)';
+        text.textContent = 'Fahruntüchtig (≥ 0,5 ‰)';
+      } else if (res.currentBac >= 0.3) {
+        badge.style.background = 'rgba(245, 158, 11, 0.15)';
+        badge.style.color = 'var(--amber)';
+        badge.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+        text.textContent = 'Relative Fahruntüchtigkeit (≥ 0,3 ‰)';
+      } else if (res.currentBac > 0.01) {
+        badge.style.background = 'rgba(56, 189, 248, 0.15)';
+        badge.style.color = 'var(--blue)';
+        badge.style.borderColor = 'rgba(56, 189, 248, 0.3)';
+        text.textContent = 'Restalkohol aktiv';
+      } else {
+        badge.style.background = 'rgba(16, 185, 129, 0.15)';
+        badge.style.color = 'var(--primary)';
+        badge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+        text.textContent = 'Fahrtauglich (0,00 ‰)';
+      }
+
+      // 3. Fahrfähigkeits-Prognose
+      renderForecast(res);
+
+      // 4. Stundentabelle / Meilensteine
+      renderMilestones(res.milestones);
+
+      // 5. Getränke-Liste (IMMER ALLE GETRÄNKE RENDERN)
+      renderDrinksList(highlightId);
+
+      // 6. Canvas Graph
+      drawCanvasChart();
+    }
+
+    function renderForecast(res) {
+      const f05 = document.getElementById('forecast05');
+      const f03 = document.getElementById('forecast03');
+      const f00 = document.getElementById('forecast00');
+
+      if (!drinks || drinks.length === 0 || res.peakBac === 0) {
+        f05.textContent = 'Sofort (0,00 ‰)';
+        f03.textContent = 'Sofort (0,00 ‰)';
+        f00.textContent = 'Sofort (0,00 ‰)';
+        return;
+      }
+
+      f05.textContent = res.peakBac < 0.5 ? 'Nie erreicht (< 0,5 ‰)' : (res.timeUnder05 ? `ab ca. ${formatDateTime(res.timeUnder05)} Uhr` : 'Noch darüber');
+      f03.textContent = res.peakBac < 0.3 ? 'Nie erreicht (< 0,3 ‰)' : (res.timeUnder03 ? `ab ca. ${formatDateTime(res.timeUnder03)} Uhr` : 'Noch darüber');
+      f00.textContent = res.timeZero ? `ab ca. ${formatDateTime(res.timeZero)} Uhr` : 'Berechnet...';
+    }
+
+    function renderMilestones(milestones) {
+      const tbody = document.getElementById('milestonesBody');
+      if (!milestones || milestones.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-muted); padding:12px;">Keine Daten vorhanden</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = milestones.map(m => {
+        const rowClass = m.isPeak ? 'class="peak-row"' : '';
+        const bacColor = m.bac >= 0.5 ? 'var(--rose)' : (m.bac >= 0.3 ? 'var(--amber)' : (m.bac > 0 ? 'var(--blue)' : 'var(--primary)'));
+        return `
+          <tr ${rowClass}>
+            <td><strong>${formatDateTime(m.time)} Uhr</strong></td>
+            <td style="color:${bacColor}; font-weight:700;">${m.bac.toFixed(2).replace('.', ',')} ‰</td>
+            <td>${m.note}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    /* -------------------------------------------------------------
+       Getränke-Liste (Kein starrer Filter)
+       ------------------------------------------------------------- */
+    function renderDrinksList(highlightId = null) {
+      const list = document.getElementById('historyList');
+      const countDesc = document.getElementById('drinkCountDesc');
+      const count = drinks ? drinks.length : 0;
+      countDesc.textContent = `${count} Getränk${count === 1 ? '' : 'e'} erfasst`;
+
+      if (!drinks || drinks.length === 0) {
+        list.innerHTML = '<div class="empty-state">Noch keine Getränke erfasst. Wähle oben ein Getränk aus.</div>';
+        return;
+      }
+
+      // Chronologisch nach Zeit absteigend (neueste zuerst)
+      const sorted = [...drinks].sort((a, b) => b.timestamp - a.timestamp);
+
+      list.innerHTML = sorted.map(d => {
+        const dt = new Date(d.timestamp);
+        const g = calcAlcoholGrams(d.volume, d.abv).toFixed(1);
+        const isHighlight = d.id === highlightId ? 'just-added' : '';
+        return `
+          <div class="history-item ${isHighlight}">
+            <div class="hist-left">
+              <span style="font-size:20px;">${d.emoji || '🍷'}</span>
+              <div>
+                <div class="hist-title">${escapeHtml(d.name)}</div>
+                <div class="hist-sub">${(d.volume).toFixed(2)} l · ${d.abv}% · ${g} g Alkohol</div>
+              </div>
+            </div>
+            <div class="hist-right">
+              <div class="hist-time">${formatDateTime(dt)} Uhr</div>
+              <button class="btn-del" onclick="deleteDrink('${d.id}')" title="Getränk löschen">🗑️</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function deleteDrink(id) {
+      drinks = drinks.filter(d => d.id !== id);
+      safeSet('pt_drinks', drinks);
+      recalcAndRender();
+      showToast('Getränk entfernt');
+    }
+
+    function clearAllDrinks() {
+      if (drinks.length === 0) return;
+      drinks = [];
+      safeSet('pt_drinks', drinks);
+      recalcAndRender();
+      showToast('Alle Getränke gelöscht');
+    }
+
+    /* -------------------------------------------------------------
+       Interaktiver Canvas & Scrubbing
+       ------------------------------------------------------------- */
+    let scrubbedPoint = null;
+
+    function setupCanvasInteractions() {
+      const canvas = document.getElementById('bacCanvas');
+
+      function handleScrub(clientX) {
+        if (!lastSimResult || !lastSimResult.points || lastSimResult.points.length < 2) return;
+        const rect = canvas.getBoundingClientRect();
+        const paddingLeft = 36;
+        const paddingRight = 14;
+        const chartW = rect.width - paddingLeft - paddingRight;
+
+        const xRel = clientX - rect.left - paddingLeft;
+        const ratio = Math.max(0, Math.min(1, xRel / chartW));
+
+        const minT = lastSimResult.points[0].time.getTime();
+        const maxT = lastSimResult.points[lastSimResult.points.length - 1].time.getTime();
+        const targetT = minT + (ratio * (maxT - minT));
+
+        scrubbedPoint = findNearestPoint(lastSimResult.points, targetT);
+        if (scrubbedPoint) {
+          document.getElementById('scrubTime').textContent = `${formatDateTime(scrubbedPoint.time)} Uhr`;
+          document.getElementById('scrubVal').textContent = `${scrubbedPoint.bac.toFixed(2).replace('.', ',')} ‰`;
+          drawCanvasChart();
+        }
+      }
+
+      canvas.addEventListener('mousemove', e => handleScrub(e.clientX));
+      canvas.addEventListener('touchmove', e => {
+        if (e.touches && e.touches[0]) {
+          handleScrub(e.touches[0].clientX);
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      canvas.addEventListener('touchstart', e => {
+        if (e.touches && e.touches[0]) {
+          handleScrub(e.touches[0].clientX);
+        }
+      }, { passive: true });
+    }
+
+    function drawCanvasChart() {
+      const canvas = document.getElementById('bacCanvas');
+      if (!canvas) return;
+
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      const w = rect.width;
+      const h = rect.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const paddingLeft = 36;
+      const paddingRight = 14;
+      const paddingTop = 20;
+      const paddingBottom = 26;
+
+      const chartW = w - paddingLeft - paddingRight;
+      const chartH = h - paddingTop - paddingBottom;
+
+      if (!lastSimResult || !lastSimResult.points || lastSimResult.points.length < 2) {
+        ctx.fillStyle = '#64748b';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Noch keine Daten für den Verlaufsgraphen', w / 2, h / 2);
+        return;
+      }
+
+      const points = lastSimResult.points;
+      let maxBac = Math.max(0.6, lastSimResult.peakBac);
+      maxBac = Math.ceil((maxBac + 0.1) * 10) / 10;
+
+      const minTime = points[0].time.getTime();
+      const maxTime = points[points.length - 1].time.getTime();
+      const timeSpan = Math.max(1, maxTime - minTime);
+
+      const getX = t => paddingLeft + ((t - minTime) / timeSpan) * chartW;
+      const getY = b => paddingTop + chartH - (b / maxBac) * chartH;
+
+      // 0,3 ‰ Linie
+      const y03 = getY(0.3);
+      ctx.beginPath();
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.45)';
+      ctx.moveTo(paddingLeft, y03);
+      ctx.lineTo(w - paddingRight, y03);
+      ctx.stroke();
+
+      // 0,5 ‰ Linie
+      const y05 = getY(0.5);
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(244, 63, 94, 0.45)';
+      ctx.moveTo(paddingLeft, y05);
+      ctx.lineTo(w - paddingRight, y05);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Y-Achse
+      ctx.fillStyle = '#64748b';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('0,5', paddingLeft - 4, y05 + 3);
+      ctx.fillText('0,3', paddingLeft - 4, y03 + 3);
+      ctx.fillText('0,0', paddingLeft - 4, getY(0) + 3);
+
+      // Zeitachse (X)
+      ctx.textAlign = 'center';
+      const labelCount = Math.max(2, Math.floor(chartW / 65));
+      for (let i = 0; i <= labelCount; i++) {
+        const t = minTime + (timeSpan * (i / labelCount));
+        const dt = new Date(t);
+        ctx.fillText(formatTimeOnly(dt), getX(t), h - 8);
+      }
+
+      // Kurvenverlauf
+      ctx.beginPath();
+      points.forEach((p, idx) => {
+        const x = getX(p.time.getTime());
+        const y = getY(p.bac);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // Füllung
+      ctx.lineTo(getX(maxTime), getY(0));
+      ctx.lineTo(getX(minTime), getY(0));
+      ctx.closePath();
+      const fillGrad = ctx.createLinearGradient(0, paddingTop, 0, h - paddingBottom);
+      fillGrad.addColorStop(0, 'rgba(16, 185, 129, 0.28)');
+      fillGrad.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+      ctx.fillStyle = fillGrad;
+      ctx.fill();
+
+      // Scrubber Marker
+      if (scrubbedPoint) {
+        const sx = getX(scrubbedPoint.time.getTime());
+        const sy = getY(scrubbedPoint.bac);
+
+        ctx.beginPath();
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.moveTo(sx, paddingTop);
+        ctx.lineTo(sx, h - paddingBottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.beginPath();
+        ctx.arc(sx, sy, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+    }
+
+    /* -------------------------------------------------------------
+       Szenario-Beispiel laden (18:30 Sekt, 20:00 Pils, 21:30 Pils, 00:00 Sarti)
+       ------------------------------------------------------------- */
+    function loadUserScenario() {
+      const base = new Date();
+      // Abend von heute simulieren
+      function makeTime(h, m, nextDay = false) {
+        const d = new Date(base.getFullYear(), base.getMonth(), base.getDate(), h, m, 0, 0);
+        if (nextDay) d.setDate(d.getDate() + 1);
+        return d.getTime();
+      }
+
+      drinks = [
+        { id: 'sc_1', name: 'Sekt (0,1 l)', volume: 0.10, abv: 11.5, timestamp: makeTime(18, 30), emoji: '🍾' },
+        { id: 'sc_2', name: 'Pils (0,4 l)', volume: 0.40, abv: 4.9, timestamp: makeTime(20, 0), emoji: '🍺' },
+        { id: 'sc_3', name: 'Pils (0,4 l)', volume: 0.40, abv: 4.9, timestamp: makeTime(21, 30), emoji: '🍺' },
+        { id: 'sc_4', name: 'Sarti Rosa (0,1 l pur)', volume: 0.10, abv: 14.0, timestamp: makeTime(0, 0, true), emoji: '🍸' }
+      ];
+
+      profile.weight = 80;
+      profile.gender = 'male';
+      profile.rate = 0.15;
+
+      safeSet('pt_profile', profile);
+      safeSet('pt_drinks', drinks);
+      updateProfileLabel();
+      recalcAndRender();
+      showToast('Beispiel-Abend geladen!');
+    }
+
+    /* -------------------------------------------------------------
+       Profil- & Custom-Drink-Modal
+       ------------------------------------------------------------- */
+    function openProfileModal() {
+      document.getElementById('inputWeight').value = profile.weight;
+      document.getElementById('inputGender').value = profile.gender;
+      document.getElementById('inputRate').value = profile.rate;
+      document.getElementById('profileModal').style.display = 'flex';
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profileModal').style.display = 'none';
+    }
+
+    function saveProfileFromModal() {
+      profile.weight = parseFloat(document.getElementById('inputWeight').value) || 80;
+      profile.gender = document.getElementById('inputGender').value;
+      profile.rate = parseFloat(document.getElementById('inputRate').value) || 0.15;
+
+      safeSet('pt_profile', profile);
+      updateProfileLabel();
+      closeProfileModal();
+      recalcAndRender();
+      showToast('Profil gespeichert');
+    }
+
+    function updateProfileLabel() {
+      const sym = profile.gender === 'male' ? '♂' : '♀';
+      document.getElementById('btnProfileLabel').textContent = `${profile.weight} kg · ${sym}`;
+    }
+
+    function openCustomModal() {
+      document.getElementById('customModal').style.display = 'flex';
+    }
+
+    function closeCustomModal() {
+      document.getElementById('customModal').style.display = 'none';
+    }
+
+    function addCustomDrink() {
+      const name = document.getElementById('custName').value.trim() || 'Getränk';
+      const vol = parseFloat(document.getElementById('custVolume').value);
+      const abv = parseFloat(document.getElementById('custAbv').value);
+
+      if (isNaN(vol) || isNaN(abv) || vol <= 0 || abv <= 0) {
+        showToast('Bitte gültige Werte eintragen');
+        return;
+      }
+
+      currentSelectedBeverage = {
+        id: 'cust_' + Date.now(),
+        name,
+        abv,
+        emoji: '🍸',
+        portions: [
+          { label: `${vol} l`, volume: vol, name: `${name} (${vol} l)` }
+        ]
+      };
+
+      closeCustomModal();
+      selectBeverage(currentSelectedBeverage);
+    }
+
+    /* -------------------------------------------------------------
+       Formatierung & Hilfswerkzeuge
+       ------------------------------------------------------------- */
+    function formatDateTime(d) {
+      if (!d) return '--:--';
+      const days = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+      return `${days[d.getDay()]}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function formatTimeOnly(d) {
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function pad(n) {
+      return n < 10 ? '0' + n : n;
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, s => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[s]));
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+  </script>
+</body>
+</html>
